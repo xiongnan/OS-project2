@@ -33,7 +33,7 @@ int user_to_kernel_ptr(const void *vaddr);
 void get_arg (struct intr_frame *f, int *arg, int n);
 void check_valid_ptr (const void *vaddr);
 void check_buffer (void* buffer, unsigned size);
-void check_ptr(const void * ptr)
+void check_ptr(const void * ptr);
 void
 syscall_init (void) 
 {
