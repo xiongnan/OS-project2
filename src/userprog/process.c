@@ -496,13 +496,13 @@ setup_stack (void **esp, const char * command)
 	  }
   }
 
-  char ** save_ptr = NULL;
-  char *token = strtok_r (command, " ", save_ptr);
+  char * save_ptr;
+  char *token = strtok_r (command, " ", &save_ptr);
   char **argv = malloc(DEFAULT_ARGV*sizeof(char *));
   int i, argc = 0, argv_size = DEFAULT_ARGV;
 
   // Push args onto stack
-  for (; token != NULL; token = strtok_r (NULL, " ", save_ptr))
+  for (; token != NULL; token = strtok_r (NULL, " ", &save_ptr))
   {
       *esp -= strlen(token) + 1;
       argv[argc] = *esp;
