@@ -97,6 +97,9 @@ syscall_handler (struct intr_frame *f UNUSED)
     case SYS_CLOSE:
 	     close(*(esp + 1));
 	     break;
+    default:
+       exit(ERROR);
+       break;
     }
 }
 
