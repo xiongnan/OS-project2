@@ -442,85 +442,84 @@ setup_stack (void **esp, char * file_name)
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success) {
         *esp = PHYS_BASE;
-                int j = 0;
-                bool space_added = true;
-                int len = strlen(file_name);
-                int i = 0;
-                for (i = 0; i < len; i++)
-                {
-                  char curr = *(file_name + i);
-                  if (curr == ' ' || curr == '\0')
-                  {
-                    if (space_added) {
-                      continue;
-                    } else {
-                      *(file_name + j) = '\0';
-                      j++;
-                      space_added = true;
-                    }
-                  } else {
-                    *(file_name + j) = *(file_name + i);
-                    j++;
-                    space_added = false;
-                  }
         
-                }
+        uint8_t *argstr_head;
+        char *cmd_name = thread_current ()->name;
+        int strlength, total_length;
+        int argc;
         
-                *(file_name + j) = '\0';
-                j++;
+        /*push the arguments string into stack*/
+        strlength = strlen(file_name) + 1;
+        *esp -= strlength;
+        memcpy(*esp, file_name, strlength);
+        total_length += strlength;
         
-                int arg_length = j;
+        /*push command name into stack*/
+        strlength = strlen(cmd_name) + 1;
+        *esp -= strlength;
+        argstr_head = *esp;
+        memcpy(*esp, cmd_name, strlength);
+        total_length += strlength;
         
-                *esp -= arg_length;
-                memcpy(*esp, file_name, arg_length);
+        /*set alignment, get the starting address, modify *esp */
+        *esp -= 4 - total_length % 4;
         
+        /* push argv[argc] null into the stack */
+        *esp -= 4;
+        * (uint32_t *) *esp = (uint32_t) NULL;
         
-                char * arg_start = *esp;
+        /* scan throught the file name with arguments string downward,
+         * using the cur_addr and total_length above to define boundary.
+         * omitting the beginning space or '\0', but for every encounter
+         * after, push the last non-space-and-'\0' address, which is current
+         * address minus 1, as one of argv to the stack, and set the space to
+         * '\0', multiple adjancent spaces and '0' is treated as one.
+         */
+        int i = total_length - 1;
+        /*omitting the starting space and '\0' */
+        while (*(argstr_head + i) == ' ' ||  *(argstr_head + i) == '\0')
+        {
+          if (*(argstr_head + i) == ' ')
+          {
+            *(argstr_head + i) = '\0';
+          }
+          i--;
+        }
         
-                /* push command to stack */
+        /*scan through args string, push args address into stack*/
+        char *mark;
+        for (mark = (char *)(argstr_head + i); i > 0;
+             i--, mark = (char*)(argstr_head+i))
+        {
+          /*detect args, if found, push it's address to stack*/
+          if ( (*mark == '\0' || *mark == ' ') &&
+              (*(mark+1) != '\0' && *(mark+1) != ' '))
+          {
+            *esp -= 4;
+            * (uint32_t *) *esp = (uint32_t) mark + 1;
+            argc++;
+          }
+          /*set space to '\0', so that each arg string will terminate*/
+          if (*mark == ' ')
+            *mark = '\0';
+        }
         
-                char * command = thread_current ()->name;
-                int comm_length = strlen(command) + 1;
-                *esp -= comm_length;
-                memcpy(*esp, command, comm_length);
+        /*push one more arg, which is the command name, into stack*/
+        *esp -= 4;
+        * (uint32_t *) *esp = (uint32_t) argstr_head;
+        argc++;
         
+        /*push argv*/
+        * (uint32_t *) (*esp - 4) = *(uint32_t *) esp;
+        *esp -= 4;
         
-                /* set alignment */
-                int total_length = arg_length + comm_length;
-                *esp -= 4 - total_length % 4;
+        /*push argc*/
+        *esp -= 4;
+        * (int *) *esp = argc;
         
-                /* push an null pointer */
-                *esp -= 4;
-                * (uint32_t *) *esp = (uint32_t) NULL;
-        
-                int argc = 0;
-                for (i = total_length - 1; i > 0; i--)
-                {
-                  char * curr = arg_start + i;
-                  if (*curr == '\0' && i < total_length - 1)
-                  {
-                    *esp -= 4;
-                    * (uint32_t *) *esp = (uint32_t) curr + 1;
-                    argc++;
-                  }
-                }
-                
-                *esp -= 4;
-                * (uint32_t *) *esp = (uint32_t) arg_start;
-                argc++;
-                
-                /*push argv*/
-                * (uint32_t *) (*esp - 4) = *(uint32_t *) esp;
-                *esp -= 4;
-                
-                /*push argc*/
-                *esp -= 4;
-                * (int *) *esp = argc;
-                
-                /*push return address*/
-                *esp -= 4;
-                * (uint32_t *) *esp = 0x0;
-        
+        /*push return address*/
+        *esp -= 4;
+        * (uint32_t *) *esp = 0x0;
       } else
         palloc_free_page (kpage);
     }
