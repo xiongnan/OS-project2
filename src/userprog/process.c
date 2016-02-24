@@ -80,7 +80,7 @@ start_process (void * cmd_line)
     }
 
   /* If load failed, quit. */
-  palloc_free_page (file_name);
+  palloc_free_page (command);
   if (!success) 
     thread_exit ();
 
