@@ -241,9 +241,6 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-// Used for setup_stack
-#define WORD_SIZE 4
-#define DEFAULT_ARGV 2
 
 static bool setup_stack (void **esp, const char* command);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
@@ -496,10 +493,11 @@ setup_stack (void **esp, const char * command)
 	  }
   }
 
+  int argv_size = 2;
   char * save_ptr;
   char *token = strtok_r (command, " ", &save_ptr);
-  char **argv = malloc(DEFAULT_ARGV*sizeof(char *));
-  int i, argc = 0, argv_size = DEFAULT_ARGV;
+  char **argv = malloc(argv_size*sizeof(char *));
+  int i, argc = 0;
 
   // Push args onto stack
   for (; token != NULL; token = strtok_r (NULL, " ", &save_ptr))
@@ -517,7 +515,7 @@ setup_stack (void **esp, const char * command)
   }
   argv[argc] = 0;
   // Align to word size (4 bytes)
-  i = (size_t) *esp % WORD_SIZE;
+  i = (size_t) *esp % 4;
   if (i)
   {
       *esp -= i;
