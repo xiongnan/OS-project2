@@ -54,65 +54,65 @@ syscall_handler (struct intr_frame *f UNUSED)
       halt();
       break;
     case SYS_EXIT:
-      check_ptr(esp + 1));
+      check_ptr(esp + 1);
 	    exit(*(esp + 1));
 	    break;
     case SYS_EXEC:
 	     //arg[0] = user_to_kernel_ptr((const void *) arg[0]);
-      check_ptr(esp + 1));
+      check_ptr(esp + 1);
 	    f->eax = exec((char *) *(esp + 1)); 
 	    break;
     case SYS_WAIT:
-      check_ptr(esp + 1));
+      check_ptr(esp + 1);
 	    f->eax = wait(*(esp + 1));
 	    break;
     case SYS_CREATE:
 	     //arg[0] = user_to_kernel_ptr((const void *) arg[0]);
-      check_ptr(esp + 1));
-      check_ptr(esp + 2));
+      check_ptr(esp + 1);
+      check_ptr(esp + 2);
 	    f->eax = create((char *) *(esp + 1), *(esp + 2));
 	    break;
     case SYS_REMOVE:
 	     //arg[0] = user_to_kernel_ptr((const void *) arg[0]);
-      check_ptr(esp + 1));
+      check_ptr(esp + 1);
 	    f->eax = remove((char *) *(esp + 1));
 	    break;
     case SYS_OPEN:
 	     //arg[0] = user_to_kernel_ptr((const void *) arg[0]);
-      check_ptr(esp + 1));
+      check_ptr(esp + 1);
 	    f->eax = open((char *) *(esp + 1));
 	    break; 		
     case SYS_FILESIZE:
-       check_ptr(esp + 1));
+       check_ptr(esp + 1);
 	     f->eax = filesize(*(esp + 1));
 	     break;
     case SYS_READ:
 	     //check_valid_buffer((void *) arg[1], (unsigned) arg[2]);
 	     //arg[1] = user_to_kernel_ptr((const void *) arg[1]);
-       check_ptr(esp + 1));
-       check_ptr(esp + 2));
-       check_ptr(esp + 3));
+       check_ptr(esp + 1);
+       check_ptr(esp + 2);
+       check_ptr(esp + 3);
 	     f->eax = read(*(esp + 1), (void *) *(esp + 2), *(esp + 3));
 	     break;
     case SYS_WRITE:
 	     //check_valid_buffer((void *) arg[1], (unsigned) arg[2]);
 	     //arg[1] = user_to_kernel_ptr((const void *) arg[1]);
-       check_ptr(esp + 1));
-       check_ptr(esp + 2));
-       check_ptr(esp + 3));
+       check_ptr(esp + 1);
+       check_ptr(esp + 2);
+       check_ptr(esp + 3);
 	     f->eax = write(*(esp + 1), (void *) *(esp + 2), *(esp + 3));
 	     break;
     case SYS_SEEK:
-       check_ptr(esp + 1));
-       check_ptr(esp + 2));
+       check_ptr(esp + 1);
+       check_ptr(esp + 2);
 	     seek(*(esp + 1), *(esp + 2));
 	     break;
     case SYS_TELL:
-       check_ptr(esp + 1));
+       check_ptr(esp + 1);
 	     f->eax = tell(*(esp + 1));
 	     break;
     case SYS_CLOSE:
-       check_ptr(esp + 1));
+       check_ptr(esp + 1);
 	     close(*(esp + 1));
 	     break;
     default:
