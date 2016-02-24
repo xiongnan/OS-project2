@@ -37,9 +37,12 @@ process_execute (const char *file_name)
   if (fn_copy == NULL)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
+  
+  char * command, * arguments;
+  command = strtok_r (fn_copy, " ", &arguments);
 
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  tid = thread_create (command, PRI_DEFAULT, start_process, arguments);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   return tid;
@@ -195,7 +198,7 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-static bool setup_stack (void **esp);
+static bool setup_stack (void **esp, char * file_name);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -222,10 +225,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
   process_activate ();
 
   /* Open executable file. */
-  file = filesys_open (file_name);
+  file = filesys_open (t->name);
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", file_name);
+      printf ("load: %s: open failed\n", t->name);
       goto done; 
     }
 
@@ -238,7 +241,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
-      printf ("load: %s: error loading executable\n", file_name);
+      printf ("load: %s: error loading executable\n", t->name);
       goto done; 
     }
 
@@ -302,7 +305,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack (esp, file_name))
     goto done;
 
   /* Start address. */
@@ -427,7 +430,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp) 
+setup_stack (void **esp, char * file_name)
 {
   uint8_t *kpage;
   bool success = false;
@@ -436,9 +439,88 @@ setup_stack (void **esp)
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-      if (success)
+      if (success) {
         *esp = PHYS_BASE;
-      else
+                int j = 0;
+                bool space_added = true;
+                int len = strlen(file_name);
+                int i = 0;
+                for (i = 0; i < len; i++)
+                {
+                  char curr = *(file_name + i);
+                  if (curr == ' ' || curr == '\0')
+                  {
+                    if (space_added) {
+                      continue;
+                    } else {
+                      *(file_name + j) = '\0';
+                      j++;
+                      space_added = true;
+                    }
+                  } else {
+                    *(file_name + j) = *(file_name + i);
+                    j++;
+                    space_added = false;
+                  }
+        
+                }
+        
+                *(file_name + j) = '\0';
+                j++;
+        
+                int arg_length = j;
+        
+                *esp -= arg_length;
+                memcpy(*esp, file_name, arg_length);
+        
+        
+                char * arg_start = *esp;
+        
+                /* push command to stack */
+        
+                char * command = thread_current ()->name;
+                int comm_length = strlen(command) + 1;
+                *esp -= comm_length;
+                memcpy(*esp, command, comm_length);
+        
+        
+                /* set alignment */
+                int total_length = arg_length + comm_length;
+                *esp -= 4 - total_length % 4;
+        
+                /* push an null pointer */
+                *esp -= 4;
+                * (uint32_t *) *esp = (uint32_t) NULL;
+        
+                int argc = 0;
+                for (i = total_length - 1; i > 0; i--)
+                {
+                  char * curr = arg_start + i;
+                  if (*curr == '\0' && i < total_length - 1)
+                  {
+                    *esp -= 4;
+                    * (uint32_t *) *esp = (uint32_t) curr + 1;
+                    argc++;
+                  }
+                }
+                
+                *esp -= 4;
+                * (uint32_t *) *esp = (uint32_t) arg_start;
+                argc++;
+                
+                /*push argv*/
+                * (uint32_t *) (*esp - 4) = *(uint32_t *) esp;
+                *esp -= 4;
+                
+                /*push argc*/
+                *esp -= 4;
+                * (int *) *esp = argc;
+                
+                /*push return address*/
+                *esp -= 4;
+                * (uint32_t *) *esp = 0x0;
+        
+      } else
         palloc_free_page (kpage);
     }
   return success;
