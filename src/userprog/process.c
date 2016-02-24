@@ -63,7 +63,6 @@ start_process (void * cmd_line)
   // Get actual file name (first parsed token)
   //char *save_ptr;
   //file_name = strtok_r(file_name, " ", &save_ptr);
-  file_name = thread_current()->name;
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
@@ -246,8 +245,7 @@ struct Elf32_Phdr
 #define WORD_SIZE 4
 #define DEFAULT_ARGV 2
 
-static bool setup_stack (void **esp, const char* file_name,
-			 char** save_ptr);
+static bool setup_stack (void **esp, const char* command);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -480,7 +478,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp, char * command) 
+setup_stack (void **esp, const char * command) 
 {
   uint8_t *kpage;
   bool success = false;
