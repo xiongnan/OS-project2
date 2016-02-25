@@ -41,11 +41,8 @@ process_execute (const char *file_name)
   strlcpy (fn_copy, file_name, PGSIZE);
 
   // Get parsed file name
-  printf("%s , %s\n", file_name, fn_copy);
   char *args;
   file_name = strtok_r((char *) file_name, " ", &args);
-
-   printf("%s , %s\n", file_name, fn_copy);
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
@@ -140,6 +137,8 @@ process_exit (void)
 
   // Free child list
   remove_child_processes();
+
+  file_close (cur->exec_file);
 
   // Set exit value to true in case killed by the kernel
   if (thread_alive(cur->parent))
@@ -275,10 +274,13 @@ load (char * command, void (**eip) (void), void **esp)
   char * file_name = t->name;
   file = filesys_open (file_name);
   if (file == NULL) 
-    {
+  {
       printf ("load: %s: open failed\n", file_name);
       goto done; 
-    }
+  }
+
+  t->exec_file = file;
+  file_deny_write (file);
 
   /* Read and verify executable header. */
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
@@ -363,7 +365,6 @@ load (char * command, void (**eip) (void), void **esp)
 
  done:
   /* We arrive here whether the load is successful or not. */
-  file_close (file);
   return success;
 }
 
