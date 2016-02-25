@@ -139,6 +139,9 @@ process_exit (void)
   // Free child list
   remove_child_processes();
 
+  if (cur->exec_file != NULL)
+    file_allow_write (cur->exec_file);
+
   // Set exit value to true in case killed by the kernel
   if (thread_alive(cur->parent))
     {
@@ -161,6 +164,7 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
     }
+
 }
 
 /* Sets up the CPU for running user code in the current
@@ -277,10 +281,13 @@ load (const char *file_name, void (**eip) (void), void **esp,
   /* Open executable file. */
   file = filesys_open (file_name);
   if (file == NULL) 
-    {
+  {
       printf ("load: %s: open failed\n", file_name);
       goto done; 
-    }
+  }
+
+  t->exec_file = file;
+  file_deny_write (file);
 
   /* Read and verify executable header. */
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
