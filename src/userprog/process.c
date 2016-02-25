@@ -140,7 +140,7 @@ process_exit (void)
   // Free child list
   remove_child_processes();
 
-  file_close(cur->file_exec);
+  file_close(cur->exec_file);
 
   // Set exit value to true in case killed by the kernel
   if (thread_alive(cur->parent))
