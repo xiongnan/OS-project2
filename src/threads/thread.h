@@ -108,6 +108,7 @@ struct thread
     tid_t parent;
     // Points to child_process struct in parent's child list
     struct child_process* cp;
+    struct file *exec_file;
 #endif
 
 
