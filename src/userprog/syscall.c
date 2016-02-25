@@ -141,18 +141,17 @@ pid_t exec (const char *cmd_line)
 {
   check_ptr(cmd_line);
   cmd_line=user_to_kernel_ptr(cmd_line);
-  //printf("print cmd_line:%s\n", cmd_line);
   pid_t pid = process_execute(cmd_line);
-  // struct child_process* cp = get_child_process(pid);
-  // ASSERT(cp);
-  // while (cp->load == NOT_LOADED)
-  //   {
-  //     barrier();
-  //   }
-  // if (cp->load == LOAD_FAIL)
-  //   {
-  //     return ERROR;
-  //   }
+  struct child_process* cp = get_child_process(pid);
+  ASSERT(cp);
+  while (cp->load == NOT_LOADED)
+    {
+      barrier();
+    }
+  if (cp->load == LOAD_FAIL)
+    {
+      return ERROR;
+    }
   return pid;
 }
 
