@@ -136,10 +136,11 @@ process_exit (void)
   // Close all files opened by process
   process_close_file(CLOSE_ALL);
 
+
   // Free child list
   remove_child_processes();
 
-
+  file_close(cur->file_exec);
 
   // Set exit value to true in case killed by the kernel
   if (thread_alive(cur->parent))
@@ -371,10 +372,10 @@ load (const char *file_name, void (**eip) (void), void **esp,
 
  done:
   /* We arrive here whether the load is successful or not. */
-  if (success) {
-    file_allow_write (file);
-  }
-  file_close (file);
+  // if (success) {
+  //   file_allow_write (file);
+  // }
+  // file_close (file);
   return success;
 }
 
