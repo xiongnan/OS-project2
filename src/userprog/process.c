@@ -133,9 +133,6 @@ process_exit (void)
   struct thread *cur = thread_current ();
   uint32_t *pd;
 
-  //if (cur->exec_file != NULL)
-    //file_allow_write (cur->exec_file);
-
   // Close all files opened by process
   process_close_file(CLOSE_ALL);
 
@@ -374,6 +371,7 @@ load (const char *file_name, void (**eip) (void), void **esp,
 
  done:
   /* We arrive here whether the load is successful or not. */
+  file_allow_write (file);
   file_close (file);
   return success;
 }
