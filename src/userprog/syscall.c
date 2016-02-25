@@ -28,8 +28,10 @@ struct file* process_get_file (int fd);
 static void syscall_handler (struct intr_frame *);
 
 void check_ptr(const void * ptr);
-void
-syscall_init (void) 
+void check_buffer (void* buffer, unsigned size);
+
+
+void syscall_init (void) 
 {
   lock_init(&filesys_lock);
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
