@@ -41,10 +41,11 @@ process_execute (const char *file_name)
   strlcpy (fn_copy, file_name, PGSIZE);
 
   // Get parsed file name
+  printf("%s , %s\n", file_name, fn_copy);
   char *args;
   file_name = strtok_r((char *) file_name, " ", &args);
 
-   //printf("%s , %s\n", file_name, fn_copy);
+   printf("%s , %s\n", file_name, fn_copy);
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
