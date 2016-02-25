@@ -29,10 +29,10 @@ int process_add_file (struct file *f);
 struct file* process_get_file (int fd);
 
 static void syscall_handler (struct intr_frame *);
-int user_to_kernel_ptr(const void *vaddr);
-void get_arg (struct intr_frame *f, int *arg, int n);
-void check_valid_ptr (const void *vaddr);
-void check_buffer (void* buffer, unsigned size);
+//int user_to_kernel_ptr(const void *vaddr);
+//void get_arg (struct intr_frame *f, int *arg, int n);
+//void check_valid_ptr (const void *vaddr);
+//void check_buffer (void* buffer, unsigned size);
 void check_ptr(const void * ptr);
 void
 syscall_init (void) 
@@ -45,7 +45,7 @@ static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
   int arg[MAX_ARGS];
-  check_valid_ptr((const void*) f->esp);
+  check_ptr((const void*) f->esp);
   uint32_t * esp = f->esp;
   int syscall_number = *esp;
   switch (syscall_number)
