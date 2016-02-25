@@ -324,7 +324,7 @@ int user_to_kernel_ptr(const void *vaddr)
 {
   // TO DO: Need to check if all bytes within range are correct
   // for strings + buffers
-  check_valid_ptr(vaddr);
+  //check_valid_ptr(vaddr);
   void *ptr = pagedir_get_page(thread_current()->pagedir, vaddr);
   if (!ptr)
     {
