@@ -42,7 +42,7 @@ process_execute (const char *file_name)
 
   // Get parsed file name
   char *args;
-  //file_name = strtok_r((char *) file_name, " ", &args);
+  file_name = strtok_r((char *) fn_copy, " ", &args);
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
@@ -269,10 +269,7 @@ load (char * command, void (**eip) (void), void **esp)
   process_activate ();
 
   /* Open executable file. */
-  //char * file_name = t->name;
-  char *args;
-  char * file_name = strtok_r(command, " ", &args);
-  //printf("%s\n", file_name);
+  char * file_name = t->name;
   file = filesys_open (file_name);
   if (file == NULL) 
     {
