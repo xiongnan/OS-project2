@@ -133,8 +133,8 @@ process_exit (void)
   struct thread *cur = thread_current ();
   uint32_t *pd;
 
-  if (cur->exec_file != NULL)
-    file_allow_write (cur->exec_file);
+  //if (cur->exec_file != NULL)
+    //file_allow_write (cur->exec_file);
 
   // Close all files opened by process
   process_close_file(CLOSE_ALL);
