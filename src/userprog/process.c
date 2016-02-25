@@ -42,7 +42,7 @@ process_execute (const char *file_name)
 
   // Get parsed file name
   char *args;
-  file_name = strtok_r((char *) file_name, " ", &args);
+  //file_name = strtok_r((char *) file_name, " ", &args);
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
@@ -177,7 +177,7 @@ process_activate (void)
      interrupts. */
   tss_update ();
 }
-
+
 /* We load ELF binaries.  The following definitions are taken
    from the ELF specification, [ELF1], more-or-less verbatim.  */
 
