@@ -269,7 +269,10 @@ load (const char * command, void (**eip) (void), void **esp)
   process_activate ();
 
   /* Open executable file. */
-  char * file_name = t->name;
+  //char * file_name = t->name;
+  char *args;
+  char * file_name = strtok_r(command, " ", &args);
+  printf("%s\n", file_name);
   file = filesys_open (file_name);
   if (file == NULL) 
     {
