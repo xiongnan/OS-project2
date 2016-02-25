@@ -133,14 +133,16 @@ process_exit (void)
   struct thread *cur = thread_current ();
   uint32_t *pd;
 
+  if (cur->exec_file != NULL)
+    file_allow_write (cur->exec_file);
+
   // Close all files opened by process
   process_close_file(CLOSE_ALL);
 
   // Free child list
   remove_child_processes();
 
-  if (cur->exec_file != NULL)
-    file_allow_write (cur->exec_file);
+
 
   // Set exit value to true in case killed by the kernel
   if (thread_alive(cur->parent))
