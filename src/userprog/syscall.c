@@ -14,9 +14,6 @@
 #include "userprog/pagedir.h"
 #include "userprog/process.h"
 
-#define MAX_ARGS 3
-#define USER_VADDR_BOTTOM ((void *) 0x08048000)
-
 struct lock filesys_lock;
 
 struct process_file {
@@ -29,10 +26,7 @@ int process_add_file (struct file *f);
 struct file* process_get_file (int fd);
 
 static void syscall_handler (struct intr_frame *);
-//int user_to_kernel_ptr(const void *vaddr);
-//void get_arg (struct intr_frame *f, int *arg, int n);
-//void check_valid_ptr (const void *vaddr);
-//void check_buffer (void* buffer, unsigned size);
+
 void check_ptr(const void * ptr);
 void
 syscall_init (void) 
@@ -44,7 +38,6 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
-  int arg[MAX_ARGS];
   check_ptr((const void*) f->esp);
   uint32_t * esp = f->esp;
   int syscall_number = *esp;
@@ -73,12 +66,10 @@ syscall_handler (struct intr_frame *f UNUSED)
 	    f->eax = create((char *) *(esp + 1), *(esp + 2));
 	    break;
     case SYS_REMOVE:
-	     //arg[0] = user_to_kernel_ptr((const void *) arg[0]);
       check_ptr(esp + 1);
 	    f->eax = remove((char *) *(esp + 1));
 	    break;
     case SYS_OPEN:
-	     //arg[0] = user_to_kernel_ptr((const void *) arg[0]);
       check_ptr(esp + 1);
 	    f->eax = open((char *) *(esp + 1));
 	    break; 		
@@ -87,16 +78,12 @@ syscall_handler (struct intr_frame *f UNUSED)
 	     f->eax = filesize(*(esp + 1));
 	     break;
     case SYS_READ:
-	     //check_valid_buffer((void *) arg[1], (unsigned) arg[2]);
-	     //arg[1] = user_to_kernel_ptr((const void *) arg[1]);
        check_ptr(esp + 1);
        check_ptr(esp + 2);
        check_ptr(esp + 3);
 	     f->eax = read(*(esp + 1), (void *) *(esp + 2), *(esp + 3));
 	     break;
     case SYS_WRITE:
-	     //check_valid_buffer((void *) arg[1], (unsigned) arg[2]);
-	     //arg[1] = user_to_kernel_ptr((const void *) arg[1]);
        check_ptr(esp + 1);
        check_ptr(esp + 2);
        check_ptr(esp + 3);
@@ -319,17 +306,6 @@ void check_buffer (void* buffer, unsigned size)
     }
 }
 
-
-
-int user_to_kernel_ptr(const void *vaddr)
-{
-  void *ptr = pagedir_get_page(thread_current()->pagedir, vaddr);
-  if (!ptr)
-    {
-      exit(ERROR);
-    }
-  return (int) ptr;
-}
 
 int process_add_file (struct file *f)
 {
