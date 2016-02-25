@@ -140,7 +140,12 @@ void exit (int status)
 pid_t exec (const char *cmd_line)
 {
   check_ptr(cmd_line);
-  cmd_line=user_to_kernel_ptr(cmd_line);
+  cmd_line = pagedir_get_page(thread_current()->pagedir, cmd_line);
+  if (!cmd_line)
+  {
+      exit(ERROR);
+  }
+  //cmd_line=user_to_kernel_ptr(cmd_line);
   pid_t pid = process_execute(cmd_line);
   struct child_process* cp = get_child_process(pid);
   ASSERT(cp);
@@ -286,13 +291,10 @@ void close (int fd)
   lock_release(&filesys_lock);
 }
 
-void check_valid_ptr (const void *vaddr)
-{
-  if (!is_user_vaddr(vaddr) || vaddr < USER_VADDR_BOTTOM)
-    {
-      exit(ERROR);
-    }
-}
+
+
+
+/* helper */
 
 void check_ptr(const void * ptr)
 {
@@ -321,9 +323,6 @@ void check_buffer (void* buffer, unsigned size)
 
 int user_to_kernel_ptr(const void *vaddr)
 {
-  // TO DO: Need to check if all bytes within range are correct
-  // for strings + buffers
-  //check_valid_ptr(vaddr);
   void *ptr = pagedir_get_page(thread_current()->pagedir, vaddr);
   if (!ptr)
     {
@@ -434,16 +433,5 @@ void remove_child_processes (void)
     }
 }
 
-void get_arg (struct intr_frame *f, int *arg, int n)
-{
-  int i;
-  int *ptr;
-  for (i = 0; i < n; i++)
-    {
-      ptr = (int *) f->esp + i + 1;
-      check_valid_ptr((const void *) ptr);
-      arg[i] = *ptr;
-    }
-}
 
 
