@@ -96,9 +96,7 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-#endif
-
-    /* Owned by thread.c. */
+        /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 
     // Needed for file system sys calls
@@ -110,6 +108,9 @@ struct thread
     tid_t parent;
     // Points to child_process struct in parent's child list
     struct child_process* cp;
+#endif
+
+
   };
 
 /* If false (default), use round-robin scheduler.
