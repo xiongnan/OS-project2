@@ -21,7 +21,7 @@
 #include "userprog/syscall.h"
 
 static thread_func start_process NO_RETURN;
-static bool load (const char * command, void (**eip) (void), void **esp);
+static bool load (char * command, void (**eip) (void), void **esp);
 
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
@@ -242,7 +242,7 @@ struct Elf32_Phdr
 #define PF_R 4          /* Readable. */
 
 
-static bool setup_stack (void **esp, const char* command);
+static bool setup_stack (void **esp, char* command);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -253,7 +253,7 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
    and its initial stack pointer into *ESP.
    Returns true if successful, false otherwise. */
 bool
-load (const char * command, void (**eip) (void), void **esp) 
+load (char * command, void (**eip) (void), void **esp) 
 {
   struct thread *t = thread_current ();
   struct Elf32_Ehdr ehdr;
@@ -272,7 +272,7 @@ load (const char * command, void (**eip) (void), void **esp)
   //char * file_name = t->name;
   char *args;
   char * file_name = strtok_r(command, " ", &args);
-  printf("%s\n", file_name);
+  //printf("%s\n", file_name);
   file = filesys_open (file_name);
   if (file == NULL) 
     {
